@@ -6,7 +6,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.TextStyle
-
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
@@ -20,6 +19,22 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 @Composable
 fun HomeView(modifier: Modifier = Modifier) {
     val viewModel: IMCViewModel = viewModel() // Instanciar el ViewModel
+    var snackbarVisible by remember { mutableStateOf(false) }
+    var showDialog by remember { mutableStateOf(true) } // Controlar la visibilidad del AlertDialog
+
+    // Mostrar el AlertDialog al iniciar
+    if (showDialog) {
+        AlertDialog(
+            onDismissRequest = { showDialog = false },
+            title = { Text("¡CUIDADO!") },
+            text = { Text("No te olvides de llenar todos los campos con los datos solicitados.") },
+            confirmButton = {
+                TextButton(onClick =  { showDialog = false }) {
+                    Text("Entendido")
+                }
+            }
+        )
+    }
 
     Column(
         modifier = Modifier
@@ -32,6 +47,7 @@ fun HomeView(modifier: Modifier = Modifier) {
 
         Spacer(modifier = Modifier.height(16.dp))
 
+        // Mostrar el selector de género
         GenderSelector()
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -42,22 +58,35 @@ fun HomeView(modifier: Modifier = Modifier) {
             label = "Edad (años)",
             keyboardType = KeyboardType.Number
         )
+
         InputField(
             value = viewModel.state.value.weight,
             onValueChange = { viewModel.updateWeight(it) },
             label = "Peso (kg)",
             keyboardType = KeyboardType.Number
         )
+
         InputField(
             value = viewModel.state.value.height,
-            onValueChange = { viewModel.updateHeight(it) },
+            onValueChange = {
+                if (it.length <= 3) { // Limitar a 3 dígitos
+                    viewModel.updateHeight(it)
+                }
+            },
             label = "Altura (cm)",
             keyboardType = KeyboardType.Number
         )
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        Button(onClick = { viewModel.calculateIMC() }) {
+        Button(onClick = {
+            viewModel.validateFields() // Validar campos
+            if (viewModel.errorMessage.value.isEmpty()) {
+                viewModel.calculateIMC() // Calcular IMC si no hay errores
+            } else {
+                snackbarVisible = true // Mostrar snackbar si hay errores
+            }
+        }) {
             Text("Calcular IMC")
         }
 
@@ -66,10 +95,20 @@ fun HomeView(modifier: Modifier = Modifier) {
         // Mostrar el resultado del IMC
         Text(
             text = "IMC: ${String.format("%.1f", viewModel.state.value.imcResult)}",
-            style = TextStyle(
-                fontSize = 30.sp,
-                fontWeight = FontWeight.Bold
-            )
+            style = TextStyle(fontSize = 40.sp, fontWeight = FontWeight.Bold)
         )
+
+        // Mostrar Snackbar si hay un mensaje de error
+        if (snackbarVisible) {
+            Snackbar(
+                action = {
+                    Button(onClick = { snackbarVisible = false }) {
+                        Text("Cerrar")
+                    }
+                }
+            ) {
+                Text(viewModel.errorMessage.value)
+            }
+        }
     }
 }
