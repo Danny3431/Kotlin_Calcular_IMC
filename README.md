@@ -34,7 +34,7 @@ la 6° y ultima etapa
 ## 📊 Ejemplo de Entrada datos
 Selecionar genero (Hombre o Mujer)
 
-Edad: 35
-Peso(): 
-Altura ():
-Botón Calcular IMC : Realizará el cálculo 
+- Edad: 
+- Peso(Kg): 
+- Altura (Cm):
+- Botón Calcular IMC : Realizará el cálculo 
