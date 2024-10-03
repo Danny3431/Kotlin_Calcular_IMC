@@ -5,8 +5,12 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.TextStyle
+
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import cl.bootcamp.myapplication9kotlin.components.GenderSelector
 import cl.bootcamp.myapplication9kotlin.components.InputField
 import cl.bootcamp.myapplication9kotlin.viewmodel.IMCViewModel
@@ -32,9 +36,24 @@ fun HomeView(modifier: Modifier = Modifier) {
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        InputField(value = viewModel.age, onValueChange = { viewModel.age = it }, label = "Edad (años)", keyboardType = KeyboardType.Number)
-        InputField(value = viewModel.weight, onValueChange = { viewModel.weight = it }, label = "Peso (kg)", keyboardType = KeyboardType.Number)
-        InputField(value = viewModel.height, onValueChange = { viewModel.height = it }, label = "Altura (cm)", keyboardType = KeyboardType.Number)
+        InputField(
+            value = viewModel.state.value.age,
+            onValueChange = { viewModel.updateAge(it) },
+            label = "Edad (años)",
+            keyboardType = KeyboardType.Number
+        )
+        InputField(
+            value = viewModel.state.value.weight,
+            onValueChange = { viewModel.updateWeight(it) },
+            label = "Peso (kg)",
+            keyboardType = KeyboardType.Number
+        )
+        InputField(
+            value = viewModel.state.value.height,
+            onValueChange = { viewModel.updateHeight(it) },
+            label = "Altura (cm)",
+            keyboardType = KeyboardType.Number
+        )
 
         Spacer(modifier = Modifier.height(16.dp))
 
@@ -45,6 +64,12 @@ fun HomeView(modifier: Modifier = Modifier) {
         Spacer(modifier = Modifier.height(16.dp))
 
         // Mostrar el resultado del IMC
-        Text(text = "IMC: ${String.format("%.1f", viewModel.imcResult)}", style = MaterialTheme.typography.bodyLarge)
+        Text(
+            text = "IMC: ${String.format("%.1f", viewModel.state.value.imcResult)}",
+            style = TextStyle(
+                fontSize = 30.sp,
+                fontWeight = FontWeight.Bold
+            )
+        )
     }
 }
