@@ -8,8 +8,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.ui.Modifier
+import cl.bootcamp.myapplication9kotlin.navigation.AppNavHost
 import cl.bootcamp.myapplication9kotlin.ui.theme.MyApplication9KotlinTheme
-import cl.bootcamp.myapplication9kotlin.view.HomeView
+
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -18,8 +19,8 @@ class MainActivity : ComponentActivity() {
         setContent {
             MyApplication9KotlinTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    // Aplica innerPadding al contenido
-                    HomeView(modifier = Modifier.padding(innerPadding))
+                    // Aplica el innerPadding al AppNavHost
+                    AppNavHost(modifier = Modifier.padding(innerPadding))
                 }
             }
         }

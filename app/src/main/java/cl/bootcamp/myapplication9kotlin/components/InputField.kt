@@ -25,3 +25,22 @@ fun InputField(
         )
     )
 }
+@Composable
+fun PatientInputFields(
+    name: String,
+    onNameChange: (String) -> Unit,
+    age: String,
+    onAgeChange: (String) -> Unit,
+    height: String,
+    onHeightChange: (String) -> Unit,
+    weight: String,
+    onWeightChange: (String) -> Unit,
+    gender: String,
+    onGenderChange: (String) -> Unit
+) {
+    InputField(value = name, onValueChange = onNameChange, label = "Nombre del Paciente")
+    InputField(value = age, onValueChange = onAgeChange, label = "Edad", keyboardType = KeyboardType.Number)
+    InputField(value = weight, onValueChange = onWeightChange, label = "Peso (kg)", keyboardType = KeyboardType.Number)
+    InputField(value = height, onValueChange = onHeightChange, label = "Altura (cm)", keyboardType = KeyboardType.Number)
+    InputField(value = gender, onValueChange = onGenderChange, label = "Género")
+}
