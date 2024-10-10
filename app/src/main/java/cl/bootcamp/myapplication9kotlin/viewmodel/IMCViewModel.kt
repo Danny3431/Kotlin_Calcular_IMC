@@ -6,25 +6,30 @@ import cl.bootcamp.myapplication9kotlin.model.PatientState
 
 
 
+
 class IMCViewModel : ViewModel() {
-    var state = mutableStateOf(PatientState( id = 0, name = "", age = 0, weight = 0, height = 0, gender = "", imcResult = 0f, healthStatus = ""))
+    val patients: MutableList<PatientState> = mutableListOf()
+    val patient: PatientState? = null
+
+
+    var state = mutableStateOf(PatientState())
         private set
 
     var errorMessage = mutableStateOf("") // Para almacenar mensajes de error
         private set
 
-    fun updateWeight(weight: String) {
-        state.value = state.value.copy(weight = weight.toIntOrNull() ?: 0)
+    fun updateWeight(weight: Int) {
+        state.value = state.value.copy(weight = weight) // No necesita toIntOrNull()
         errorMessage.value = "" // Limpiar mensaje de error al actualizar
     }
 
-    fun updateHeight(height: String) {
-        state.value = state.value.copy(height = height.toIntOrNull() ?: 0)
+    fun updateHeight(height: Int) {
+        state.value = state.value.copy(height = height) // No necesita toIntOrNull()
         errorMessage.value = "" // Limpiar mensaje de error al actualizar
     }
 
-    fun updateAge(age: String) {
-        state.value = state.value.copy(age = age.toIntOrNull() ?: 0)
+    fun updateAge(age: Int) {
+        state.value = state.value.copy(age = age) // No necesita toIntOrNull()
         errorMessage.value = "" // Limpiar mensaje de error al actualizar
     }
 
@@ -32,10 +37,7 @@ class IMCViewModel : ViewModel() {
         state.value = state.value.copy(gender = gender)
         errorMessage.value = "" // Limpiar mensaje de error al actualizar
     }
-    fun updateName(name: String) {
-        state.value = state.value.copy(name = name)
-        errorMessage.value = "" // Limpiar mensaje de error al actualizar
-    }
+
     fun healthStatus(imc: Float): String {
         return when {
             imc < 18.5 -> "Bajo peso"
@@ -54,14 +56,12 @@ class IMCViewModel : ViewModel() {
 
         val errors = mutableListOf<String>()
 
-        if (state.value.name.isEmpty()) {
-            errors.add("Por favor, ingrese un nombre.")
-        }
+
         if ( state.value.weight <= 0) {
             errors.add("Por favor, ingrese un peso válido.")
         }
         if ( state.value.height <= 0 || state.value.height > 270) {
-            errors.add("Por favor, ingrese una altura válida (máx. 270 cm).")
+            errors.add("Por favor, ingrese una altura válida (máx. 270 cm).") // Altura máxima de 270 cm
         }
         if (state.value.age <= 0 || state.value.age > 125) { // edad maxima de 125  años es una edad razonable
             errors.add("Por favor, ingrese una edad válida.")

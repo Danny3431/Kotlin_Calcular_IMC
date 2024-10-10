@@ -1,5 +1,9 @@
 package cl.bootcamp.myapplication9kotlin.view
 
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -11,26 +15,30 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import cl.bootcamp.myapplication9kotlin.model.PatientState
+import cl.bootcamp.myapplication9kotlin.viewmodel.SharedViewModel
+import cl.bootcamp.myapplication9kotlin.view.PatientsDataView
+import cl.bootcamp.myapplication9kotlin.view.PatientsView
 import cl.bootcamp.myapplication9kotlin.viewmodel.PatientsViewModel
-import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.ui.text.input.KeyboardType
-
-
+import cl.bootcamp.myapplication9kotlin.viewmodel.IMCViewModel
+import cl.bootcamp.myapplication9kotlin.view.ImcInputView
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PatientsView(navController: NavController, modifier: Modifier = Modifier) {
     // Usar el ViewModel para obtener la lista de pacientes
-    val viewModel: PatientsViewModel = viewModel()
+    val sharedViewModel: SharedViewModel = viewModel()
+    val patientsList by sharedViewModel.patientsList.observeAsState(emptyList())
+
+
+
+
     var showModal by remember { mutableStateOf(false) }
-    var id by remember { mutableStateOf(0) }
     var newPatientName by remember { mutableStateOf("") }
-    var newPatientAge by remember { mutableStateOf("") } // Cambia a String
-    var newPatientHeight by remember { mutableStateOf("") } // Cambia a String
-    var newPatientWeight by remember { mutableStateOf("") } // Cambia a String
-    var newPatientGender by remember { mutableStateOf("") }
     var errorMessage by remember { mutableStateOf("") }
+
+    var state by remember { mutableStateOf(PatientState()) }
+
 
     Scaffold(
         topBar = {
@@ -50,17 +58,17 @@ fun PatientsView(navController: NavController, modifier: Modifier = Modifier) {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             LazyColumn {
-                items(viewModel.patients) { patient ->
-                    PatientListCard(patient = patient, navController = navController ) {
-
-                        navController.navigate("home/${patient.id}") // Navega hacia donde se piden datos para el IMC
+                items(patientsList) { patient ->
+                    PatientListCard(  patient = patient,  navController = navController) {
+                        navController.navigate("imcInput/{patientId}") // Navega a HomeView con el ID del paciente
                     }
                 }
             }
 
+
             // Modal para agregar un nuevo paciente
             if (showModal) {
-                AlertDialog(
+               AlertDialog(
                     onDismissRequest = { showModal = false },
                     title = { Text("Agregar Paciente") },
                     text = {
@@ -86,10 +94,11 @@ fun PatientsView(navController: NavController, modifier: Modifier = Modifier) {
                         TextButton(onClick = {
                             if (newPatientName.isBlank()) {
                                 errorMessage = "El nombre no puede estar en blanco."
-                            } else if (viewModel.patients.any { it.name == newPatientName }) {
+                            } else if (patientsList.any { it.name == newPatientName }) {
                                 errorMessage = "Ya existe un paciente con este nombre."
                             } else {
-                                viewModel.addPatient(newPatientName, 0, 0, 0, "", 0f, "")
+                                // Agregar nuevo paciente (ajusta los parámetros según tu modelo)
+                                sharedViewModel.addPatientToList( PatientState(name = newPatientName ))
                                 newPatientName = ""
                                 showModal = false
                             }
@@ -104,6 +113,7 @@ fun PatientsView(navController: NavController, modifier: Modifier = Modifier) {
                         }
                     }
                 )
+
             }
         }
     }
@@ -118,6 +128,7 @@ fun PatientListCard(patient: PatientState, navController: NavController, onClick
         modifier = Modifier
             .padding(8.dp)
             .fillMaxWidth() // Usar el ancho completo de la pantalla
+            .clickable { navController.navigate("imcInput/${patient.id}") }
     ) {
         Row(
             modifier = Modifier
@@ -126,14 +137,13 @@ fun PatientListCard(patient: PatientState, navController: NavController, onClick
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(text = patient.id.toString(), style = MaterialTheme.typography.bodyMedium)
-            Text(text =  patient.name, style = MaterialTheme.typography.bodyLarge)
+            Text(text = "ID: ${patient.id}", style = MaterialTheme.typography.titleMedium)
+            Text(text = " ${patient.name}", style = MaterialTheme.typography.titleLarge)
             Button(onClick = {
-                navController.navigate("home/${patient.id}") // Navega a HomeView con el ID del paciente
+                navController.navigate("imcInput/{patientId") // Navega a HomeView con el ID del paciente
             }) {
                 Text("Calcular IMC")
             }
         }
     }
-
 }

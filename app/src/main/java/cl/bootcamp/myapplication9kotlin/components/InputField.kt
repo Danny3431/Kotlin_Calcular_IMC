@@ -27,20 +27,60 @@ fun InputField(
 }
 @Composable
 fun PatientInputFields(
-    name: String,
-    onNameChange: (String) -> Unit,
-    age: String,
-    onAgeChange: (String) -> Unit,
-    height: String,
-    onHeightChange: (String) -> Unit,
-    weight: String,
-    onWeightChange: (String) -> Unit,
-    gender: String,
-    onGenderChange: (String) -> Unit
+name: String,
+onNameChange: (String) -> Unit,
+age: Int,
+onAgeChange: (Int) -> Unit,
+height: Int,
+onHeightChange: (Int) -> Unit,
+weight: Int,
+onWeightChange: (Int) -> Unit,
+gender: String,
+onGenderChange: (String) -> Unit
 ) {
+
+
+
     InputField(value = name, onValueChange = onNameChange, label = "Nombre del Paciente")
-    InputField(value = age, onValueChange = onAgeChange, label = "Edad", keyboardType = KeyboardType.Number)
-    InputField(value = weight, onValueChange = onWeightChange, label = "Peso (kg)", keyboardType = KeyboardType.Number)
-    InputField(value = height, onValueChange = onHeightChange, label = "Altura (cm)", keyboardType = KeyboardType.Number)
+    // Campo para la edad
+    InputField(
+        value = age.toString(),
+        onValueChange = {
+            it.toIntOrNull()?.let { ageValue ->
+                onAgeChange(ageValue)
+            }
+        },
+        label = "Edad",
+        keyboardType = KeyboardType.Number
+    )
+
+    // Campo para el peso
+    InputField(
+        value = weight.toString(),
+        onValueChange = {
+            it.toIntOrNull()?.let { weightValue ->
+                onWeightChange(weightValue)
+            }
+        },
+        label = "Peso (kg)",
+        keyboardType = KeyboardType.Number
+    )
+
+    // Campo para la altura
+    InputField(
+        value = height.toString(),
+        onValueChange = {
+            if (it.length <= 3) { // Limitar a 3 dígitos
+                it.toIntOrNull()?.let { heightValue ->
+                    onHeightChange(heightValue)
+                }
+            }
+        },
+        label = "Altura (cm)",
+        keyboardType = KeyboardType.Number
+    )
+
+    // Campo para el género
     InputField(value = gender, onValueChange = onGenderChange, label = "Género")
 }
+

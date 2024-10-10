@@ -9,7 +9,9 @@ data class PatientState(
     var gender: String = "", // "Hombre" o "Mujer"
     var imc: Float = 0f,     // Índice de masa corporal (IMC)
     val imcResult: Float? = null,  // IMC que se calcula después
-    var healthStatus: String = "" // Estado de salud según la OMS
+    var healthStatus: String = "", // Estado de salud según la OMS
+    val showModal: Boolean = false,
+    val patientCompleted: Boolean = false
 
 ) {
     // Método copy para crear una copia con algunos cambios
