@@ -13,10 +13,7 @@ data class PatientState(
     val showModal: Boolean = false,
     val patientCompleted: Boolean = false
 
-) {
-    // Método copy para crear una copia con algunos cambios
+)
 
-
-}
 
 

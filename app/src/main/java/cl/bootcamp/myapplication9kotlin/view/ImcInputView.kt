@@ -76,29 +76,49 @@ fun ImcInputView(navController: NavController, patientId: Int) {
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Campo de edad
         InputField(
-            value = patientState.age.toString(),
-            onValueChange = { it.toIntOrNull()?.let {
-                age -> sharedViewModel.updatePatient(patientState.copy(age = age)) } },
+            value = if (patientState.age > 0) patientState.age.toString() else "",
+            onValueChange = {
+                if (it.isEmpty()) {
+                    sharedViewModel.updatePatient(patientState.copy(age = 0)) // O manejarlo como desees
+                } else {
+                    it.toIntOrNull()?.let { age ->
+                        sharedViewModel.updatePatient(patientState.copy(age = age))
+                    }
+                }
+            },
             label = "Edad (años)",
             keyboardType = KeyboardType.Number
         )
 
-        // Campo de peso
+// Campo de peso
         InputField(
-            value = patientState.weight.toString(),
-            onValueChange = { it.toIntOrNull()?.let {
-                weight -> sharedViewModel.updatePatient(patientState.copy(weight = weight)) } },
+            value = if (patientState.weight > 0) patientState.weight.toString() else "",
+            onValueChange = {
+                if (it.isEmpty()) {
+                    sharedViewModel.updatePatient(patientState.copy(weight = 0))
+                } else {
+                    it.toIntOrNull()?.let { weight ->
+                        sharedViewModel.updatePatient(patientState.copy(weight = weight))
+                    }
+                }
+            },
             label = "Peso (kg)",
             keyboardType = KeyboardType.Number
         )
 
-        // Campo de altura
+// Campo de altura
         InputField(
-            value = patientState.height.toString(),
-            onValueChange = { it.toIntOrNull()?.let {
-                height -> sharedViewModel.updatePatient(patientState.copy(height = height)) } },
+            value = if (patientState.height > 0) patientState.height.toString() else "",
+            onValueChange = {
+                if (it.isEmpty()) {
+                    sharedViewModel.updatePatient(patientState.copy(height = 0))
+                } else {
+                    it.toIntOrNull()?.let { height ->
+                        sharedViewModel.updatePatient(patientState.copy(height = height))
+                    }
+                }
+            },
             label = "Altura (cm)",
             keyboardType = KeyboardType.Number
         )
@@ -138,6 +158,7 @@ fun ImcInputView(navController: NavController, patientId: Int) {
             style = MaterialTheme.typography.bodyLarge
         )
 
+        Spacer(modifier = Modifier.height(30.dp))
         Button(onClick = { /*TODO*/ }) {
             Text("Mostrar Datos Paciente")
         }

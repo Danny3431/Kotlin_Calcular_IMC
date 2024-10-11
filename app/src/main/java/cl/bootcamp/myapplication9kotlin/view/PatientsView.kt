@@ -26,6 +26,7 @@ import cl.bootcamp.myapplication9kotlin.view.ImcInputView
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PatientsView(navController: NavController, modifier: Modifier = Modifier) {
+
     // Usar el ViewModel para obtener la lista de pacientes
     val sharedViewModel: SharedViewModel = viewModel()
     val patientsList by sharedViewModel.patientsList.observeAsState(emptyList())
@@ -57,7 +58,12 @@ fun PatientsView(navController: NavController, modifier: Modifier = Modifier) {
             verticalArrangement = Arrangement.Top,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            LazyColumn {
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp)
+                    .weight(1f)
+            ) {
                 items(patientsList) { patient ->
                     PatientListCard(  patient = patient,  navController = navController) {
                         navController.navigate("imcInput/{patientId}") // Navega a HomeView con el ID del paciente

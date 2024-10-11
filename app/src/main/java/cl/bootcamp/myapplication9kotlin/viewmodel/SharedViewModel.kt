@@ -3,9 +3,11 @@ package cl.bootcamp.myapplication9kotlin.viewmodel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import cl.bootcamp.myapplication9kotlin.model.PatientState
 
 
+//private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "patient_preferences")
 
 class SharedViewModel : ViewModel() {
 
@@ -15,8 +17,62 @@ class SharedViewModel : ViewModel() {
 
     init {
         _patient.value = PatientState()
+        //loadPatientData()
     }
 
+    /*
+    // Cargar los datos del paciente desde SharedPreferences
+    private fun loadPatientData() {
+    viewModelScope.launch {
+        try {
+            val preferences = context.dataStore.data.first()
+            _patient.value = PatientState(
+                name = preferences[PreferencesKeys.NAME] ?: "",
+                age = preferences[PreferencesKeys.AGE] ?: 0,
+                height = preferences[PreferencesKeys.HEIGHT] ?: 0,
+                weight = preferences[PreferencesKeys.WEIGHT] ?: 0,
+                gender = preferences[PreferencesKeys.GENDER] ?: "",
+                imcResult = preferences[PreferencesKeys.IMC_RESULT] ?: 0f
+            )
+        } catch (e: Exception) {
+            // Manejar el error (p. ej. log)
+        }
+    }
+}
+
+    // Guardar los datos del paciente en SharedPreferences
+    private fun savePatientData(patientState: PatientState) {
+    viewModelScope.launch {
+        try {
+            context.dataStore.edit { preferences ->
+                preferences[PreferencesKeys.NAME] = patientState.name
+                preferences[PreferencesKeys.AGE] = patientState.age
+                preferences[PreferencesKeys.HEIGHT] = patientState.height
+                preferences[PreferencesKeys.WEIGHT] = patientState.weight
+                preferences[PreferencesKeys.GENDER] = patientState.gender
+                preferences[PreferencesKeys.IMC_RESULT] = patientState.imcResult ?: 0f
+            }
+        } catch (e: Exception) {
+            // Manejar el error
+        }
+    }
+}
+
+    // Método para actualizar el paciente actual
+    fun updatePatientDetails(newPatient: PatientState) {
+        _patient.value = newPatient
+        savePatientData(newPatient)
+    }
+    // Métodos para guardar y recuperar datos
+    object PreferencesKeys {
+        val NAME = stringPreferencesKey("name")
+        val AGE = intPreferencesKey("age")
+        val HEIGHT = intPreferencesKey("height")
+        val WEIGHT = intPreferencesKey("weight")
+        val GENDER = stringPreferencesKey("gender")
+        val IMC_RESULT = floatPreferencesKey("imc_result")
+    }
+     */
 
     fun clearPatient() {
         _patient.value = PatientState()
@@ -69,8 +125,11 @@ class SharedViewModel : ViewModel() {
 
     // Calcular el IMC
     private fun calculateIMC(weight: Int, height: Int): Number {
-        return if (weight > 0 && height > 0) 0f else
-        weight / (height * height) // Fórmula del IMC
+        return if (weight > 0 && height > 0) {
+            weight / (height * height) // Fórmula del IMC
+        } else {
+            0f
+        }
     }
 
 

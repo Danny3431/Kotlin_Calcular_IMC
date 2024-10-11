@@ -22,7 +22,7 @@ fun AppNavHost(modifier: Modifier = Modifier) {
         composable("patients") { PatientsView(navController) }
         composable("imcInput/{patientId}") { backStackEntry ->
             val patientId = backStackEntry.arguments?.getString("patientId")?.toIntOrNull() ?: 0
-            // Usa toIntOrNull para evitar excepciones
+            // Se usa toIntOrNull para evitar excepciones
             ImcInputView(navController, patientId)
         }
 

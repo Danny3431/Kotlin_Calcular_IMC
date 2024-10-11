@@ -1,5 +1,6 @@
 package cl.bootcamp.myapplication9kotlin.view
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -9,9 +10,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import cl.bootcamp.myapplication9kotlin.R
 import cl.bootcamp.myapplication9kotlin.model.PatientState
 import cl.bootcamp.myapplication9kotlin.viewmodel.IMCViewModel
 import cl.bootcamp.myapplication9kotlin.viewmodel.PatientsViewModel
@@ -21,6 +24,7 @@ import cl.bootcamp.myapplication9kotlin.viewmodel.SharedViewModel
 fun PatientsDataView(navController: NavController, modifier: Modifier = Modifier) {
     // Aquí va la lógica de tu vista
     Text(text = "Detalles del paciente")
+    var state by remember { mutableStateOf(PatientState()) }
 
     // Puedes acceder a los datos del paciente desde el ViewModel compartido
     // Utilizar el ViewModel compartido
@@ -48,23 +52,25 @@ fun PatientsDataView(navController: NavController, modifier: Modifier = Modifier
         // Mostrar los detalles del paciente
         patient?.let {
             Text("Nombre: ${it.name}")
+
+            // Mostrar el icono según el género
+            val genderIcon = if (it.gender == "Hombre") {
+                painterResource(id = R.drawable.baseline_male_24) // Reemplaza con tu recurso
+            } else {
+                painterResource(id = R.drawable.baseline_female_24) // Reemplaza con tu recurso
+            }
+            Image(painter = genderIcon, contentDescription = "Género", modifier = Modifier.size(24.dp))
             Text("Género: ${it.gender}")
             Text("Edad: ${it.age}")
             Text("Altura: ${it.height} cm")
             Text("Peso: ${it.weight} kg")
-            Text("IMC: ${String.format("%.1f", it.imcResult)}")
+            Text("IMC: ${String.format("%.1f", it.imcResult ?: 0f)}")
             Text("Estado de Salud: ${it.healthStatus}")
         } ?: Text("No hay datos disponibles")
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // Campo para el nuevo nombre del paciente
-        TextField(
-            value = newPatientName,
-            onValueChange = { newPatientName = it },
-            label = { Text("Nombre del Nuevo Paciente") },
-            isError = errorMessage.isNotEmpty()
-        )
+
 
         if (errorMessage.isNotEmpty()) {
             Text(errorMessage, color = MaterialTheme.colorScheme.error)
@@ -74,7 +80,7 @@ fun PatientsDataView(navController: NavController, modifier: Modifier = Modifier
 
 
         Button(onClick = {
-            sharedViewModel.addPatientToList(PatientState(name = newPatientName )) // Agregar paciente a la lista
+            sharedViewModel.addPatientToList(PatientState()) // Agregar paciente a la lista
             navController.navigate("patients") // Navegar a la pantalla de lista de pacientes
         }) {
             Text("Guardar Paciente")
