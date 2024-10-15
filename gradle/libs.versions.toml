@@ -12,6 +12,8 @@ roomRuntimeAndroid = "2.7.0-alpha08"
 navigationCompose = "2.8.2"
 navigationRuntimeKtx = "2.8.2"
 runtimeLivedata = "1.7.3"
+uiDesktop = "1.7.0"
+firebaseCrashlyticsBuildtools = "3.0.2"
 
 
 [libraries]
@@ -34,6 +36,8 @@ androidx-room-runtime-android = { group = "androidx.room", name = "room-runtime-
 androidx-navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigationCompose" }
 androidx-navigation-runtime-ktx = { group = "androidx.navigation", name = "navigation-runtime-ktx", version.ref = "navigationRuntimeKtx" }
 androidx-runtime-livedata = { group = "androidx.compose.runtime", name = "runtime-livedata", version.ref = "runtimeLivedata" }
+androidx-ui-desktop = { group = "androidx.compose.ui", name = "ui-desktop", version.ref = "uiDesktop" }
+firebase-crashlytics-buildtools = { group = "com.google.firebase", name = "firebase-crashlytics-buildtools", version.ref = "firebaseCrashlyticsBuildtools" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

@@ -1,44 +1,56 @@
 package cl.bootcamp.myapplication9kotlin.viewmodel
 
+import android.app.Application
+import android.content.Context
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.floatPreferencesKey
+import androidx.datastore.preferences.core.intPreferencesKey
+import androidx.datastore.preferences.core.stringPreferencesKey
+import androidx.datastore.preferences.preferencesDataStore
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import cl.bootcamp.myapplication9kotlin.model.PatientState
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 
 
-//private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "patient_preferences")
+private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "patient_preferences")
+class SharedViewModel(application: Application) : AndroidViewModel(application) {
+    private val context: Context = application.applicationContext
 
-class SharedViewModel : ViewModel() {
-
-    // LiveData para el paciente actual
     private val _patient = MutableLiveData<PatientState>()
     val patient: LiveData<PatientState> = _patient
 
     init {
         _patient.value = PatientState()
-        //loadPatientData()
+        loadPatientData()
     }
 
-    /*
+
     // Cargar los datos del paciente desde SharedPreferences
     private fun loadPatientData() {
     viewModelScope.launch {
         try {
-            val preferences = context.dataStore.data.first()
-            _patient.value = PatientState(
-                name = preferences[PreferencesKeys.NAME] ?: "",
-                age = preferences[PreferencesKeys.AGE] ?: 0,
-                height = preferences[PreferencesKeys.HEIGHT] ?: 0,
-                weight = preferences[PreferencesKeys.WEIGHT] ?: 0,
-                gender = preferences[PreferencesKeys.GENDER] ?: "",
-                imcResult = preferences[PreferencesKeys.IMC_RESULT] ?: 0f
-            )
-        } catch (e: Exception) {
-            // Manejar el error (p. ej. log)
+
+                val preferences = context.dataStore.data.first()
+                _patient.value = PatientState(
+                    name = preferences[PreferencesKeys.NAME] ?: "",
+                    age = preferences[PreferencesKeys.AGE] ?: 0,
+                    height = preferences[PreferencesKeys.HEIGHT] ?: 0,
+                    weight = preferences[PreferencesKeys.WEIGHT] ?: 0,
+                    gender = preferences[PreferencesKeys.GENDER] ?: "",
+                    imcResult = preferences[PreferencesKeys.IMC_RESULT] ?: 0f
+                )
+            } catch (e: Exception) {
+            // Manejar el error
         }
     }
-}
+    }
 
     // Guardar los datos del paciente en SharedPreferences
     private fun savePatientData(patientState: PatientState) {
@@ -72,15 +84,12 @@ class SharedViewModel : ViewModel() {
         val GENDER = stringPreferencesKey("gender")
         val IMC_RESULT = floatPreferencesKey("imc_result")
     }
-     */
+
 
     fun clearPatient() {
         _patient.value = PatientState()
     }
 
-    fun updatePatientDetails(newPatient: PatientState) {
-        _patient.value = newPatient
-    }
 
     fun getPatientById(id: Int): PatientState? {
         // Lógica para obtener el paciente por ID, si es necesario

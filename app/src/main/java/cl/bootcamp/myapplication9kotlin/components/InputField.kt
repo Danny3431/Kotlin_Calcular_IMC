@@ -39,7 +39,7 @@ gender: String,
 onGenderChange: (String) -> Unit
 ) {
 
-
+    GenderSelector(selectedGender = gender, onGenderSelected = onGenderChange)
 
     InputField(value = name, onValueChange = onNameChange, label = "Nombre del Paciente")
     // Campo para la edad

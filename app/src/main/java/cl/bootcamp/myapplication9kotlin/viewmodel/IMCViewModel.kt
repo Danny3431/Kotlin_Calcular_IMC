@@ -2,9 +2,13 @@ package cl.bootcamp.myapplication9kotlin.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.compose.runtime.mutableStateOf
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.stringPreferencesKey
 import cl.bootcamp.myapplication9kotlin.model.PatientState
-
-
+import com.google.firebase.crashlytics.buildtools.reloc.com.google.common.reflect.TypeToken
+import com.google.gson.Gson
 
 
 class IMCViewModel : ViewModel() {
@@ -78,22 +82,22 @@ class IMCViewModel : ViewModel() {
         return true
     }
 
-    fun calculateIMC() {
+    fun calculateIMC(): Float? {
         val weightValue = state.value.weight
         val heightValue = state.value.height / 100f // Convertir cm a metros
 
-        if ( state.value.age <= 0 || state.value.age > 125) {
+        if (state.value.age <= 0 || state.value.age > 125) {
             errorMessage.value = "Por favor, ingrese una edad válida."
-            return
+            return null
         }
 
-        if (weightValue == null || weightValue <= 0) {
+        if (weightValue <= 0) {
             errorMessage.value = "Por favor, ingrese un peso válido."
-            return
+            return null
         }
-        if (heightValue == null || heightValue <= 0) {
+        if (heightValue <= 0) {
             errorMessage.value = "Por favor, ingrese una altura válida."
-            return
+            return null
         }
 
         // Calcular el IMC
@@ -104,5 +108,41 @@ class IMCViewModel : ViewModel() {
 
         // Limpiar mensaje de error al calcular
         errorMessage.value = ""
+        return imcResult
+    }
+
+    fun addPatient(patient: PatientState) {
+        patients.add(patient)
+    }
+
+    fun getPatient(index: Int): PatientState? {
+        return if (index in patients.indices) {
+            patients[index]
+        } else {
+            null
+        }
+    }
+
+    // Métodos para guardar y cargar pacientes en DataStore
+    suspend fun savePatientsToDataStore(dataStore: DataStore<Preferences>) {
+        val patientJson = Gson().toJson(patients)
+        dataStore.edit { preferences ->
+            preferences[stringPreferencesKey("patients")] = patientJson
+        }
+    }
+
+    suspend fun loadPatientsFromDataStore(dataStore: DataStore<Preferences>) {
+        dataStore.data.collect { preferences ->
+            val patientJson = preferences[stringPreferencesKey("patients")] ?: return@collect
+            val patientListType = object : TypeToken<List<PatientState>>() {}.type
+            patients.clear()
+            patients.addAll(Gson().fromJson(patientJson, patientListType))
+        }
+    }
+
+    fun saveCurrentPatient() {
+        if (validateFields()) {
+            addPatient(state.value)
+        }
     }
 }

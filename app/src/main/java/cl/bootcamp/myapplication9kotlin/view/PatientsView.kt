@@ -16,16 +16,12 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import cl.bootcamp.myapplication9kotlin.model.PatientState
 import cl.bootcamp.myapplication9kotlin.viewmodel.SharedViewModel
-import cl.bootcamp.myapplication9kotlin.view.PatientsDataView
-import cl.bootcamp.myapplication9kotlin.view.PatientsView
-import cl.bootcamp.myapplication9kotlin.viewmodel.PatientsViewModel
-import cl.bootcamp.myapplication9kotlin.viewmodel.IMCViewModel
-import cl.bootcamp.myapplication9kotlin.view.ImcInputView
+
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PatientsView(navController: NavController, modifier: Modifier = Modifier) {
+fun PatientsView(navController: NavController, sharedViewModel: SharedViewModel, modifier: Modifier = Modifier ) {
 
     // Usar el ViewModel para obtener la lista de pacientes
     val sharedViewModel: SharedViewModel = viewModel()
@@ -65,7 +61,7 @@ fun PatientsView(navController: NavController, modifier: Modifier = Modifier) {
                     .weight(1f)
             ) {
                 items(patientsList) { patient ->
-                    PatientListCard(  patient = patient,  navController = navController) {
+                    PatientListCard(  patient = patient,  navController = navController,sharedViewModel = sharedViewModel) {
                         navController.navigate("imcInput/{patientId}") // Navega a HomeView con el ID del paciente
                     }
                 }
@@ -126,10 +122,8 @@ fun PatientsView(navController: NavController, modifier: Modifier = Modifier) {
 }
 
 
-
-
 @Composable
-fun PatientListCard(patient: PatientState, navController: NavController, onClick: () -> Unit) {
+fun PatientListCard(patient: PatientState, navController: NavController, sharedViewModel: SharedViewModel, onClick: () -> Unit) {
     Card(
         modifier = Modifier
             .padding(8.dp)
