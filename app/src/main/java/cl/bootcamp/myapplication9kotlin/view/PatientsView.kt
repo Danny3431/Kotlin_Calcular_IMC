@@ -16,26 +16,21 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import cl.bootcamp.myapplication9kotlin.model.PatientState
 import cl.bootcamp.myapplication9kotlin.viewmodel.SharedViewModel
+import cl.bootcamp.myapplication9kotlin.components.GenderSelector
 
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PatientsView(navController: NavController, sharedViewModel: SharedViewModel, modifier: Modifier = Modifier ) {
+fun PatientsView(navController: NavController, sharedViewModel: SharedViewModel, modifier: Modifier = Modifier) {
 
-    // Usar el ViewModel para obtener la lista de pacientes
     val sharedViewModel: SharedViewModel = viewModel()
     val patientsList by sharedViewModel.patientsList.observeAsState(emptyList())
 
-
-
-
     var showModal by remember { mutableStateOf(false) }
     var newPatientName by remember { mutableStateOf("") }
+
     var errorMessage by remember { mutableStateOf("") }
-
-    var state by remember { mutableStateOf(PatientState()) }
-
 
     Scaffold(
         topBar = {
@@ -54,6 +49,7 @@ fun PatientsView(navController: NavController, sharedViewModel: SharedViewModel,
             verticalArrangement = Arrangement.Top,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            // Mostrar el listado de pacientes
             LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
@@ -61,16 +57,22 @@ fun PatientsView(navController: NavController, sharedViewModel: SharedViewModel,
                     .weight(1f)
             ) {
                 items(patientsList) { patient ->
-                    PatientListCard(  patient = patient,  navController = navController,sharedViewModel = sharedViewModel) {
-                        navController.navigate("imcInput/{patientId}") // Navega a HomeView con el ID del paciente
-                    }
+                    PatientListCard(
+                        patient = patient,
+                        navController = navController,
+                        sharedViewModel = sharedViewModel,
+                                onClick = {
+                              navController.navigate(
+                                "imcInput/${patient.id}"
+                            ) // Navegar con el ID
+                        }
+                    )
                 }
             }
 
-
             // Modal para agregar un nuevo paciente
             if (showModal) {
-               AlertDialog(
+                AlertDialog(
                     onDismissRequest = { showModal = false },
                     title = { Text("Agregar Paciente") },
                     text = {
@@ -94,15 +96,32 @@ fun PatientsView(navController: NavController, sharedViewModel: SharedViewModel,
                     },
                     confirmButton = {
                         TextButton(onClick = {
+                            // Validar los campos
                             if (newPatientName.isBlank()) {
                                 errorMessage = "El nombre no puede estar en blanco."
                             } else if (patientsList.any { it.name == newPatientName }) {
                                 errorMessage = "Ya existe un paciente con este nombre."
                             } else {
-                                // Agregar nuevo paciente (ajusta los parámetros según tu modelo)
-                                sharedViewModel.addPatientToList( PatientState(name = newPatientName ))
+                                // Crear nuevo paciente con ID automático
+                                val newId = patientsList.size + 1 // Generar ID automático
+
+                                sharedViewModel.addPatient(
+                                    PatientState(
+                                        id = newId, // Asignar ID automáticamente
+                                        name = newPatientName,
+                                        age = 0, // Asignar 0 o manejar más adelante
+                                        height = 0, // Asignar 0 o manejar más adelante
+                                        weight = 0, // Asignar 0 o manejar más adelante
+                                        gender = "", //  Manejar más adelante
+                                        imcResult = 0f // Asignar 0 o manejar más adelante
+
+                                    )
+                                )
+
+                                // Limpiar los campos
                                 newPatientName = ""
                                 showModal = false
+                                sharedViewModel.clearPatientData() // Limpiar el estado del paciente
                             }
                         }) {
                             Text("Agregar")
@@ -111,39 +130,67 @@ fun PatientsView(navController: NavController, sharedViewModel: SharedViewModel,
                     dismissButton = {
                         TextButton(onClick = { showModal = false }) {
                             Text("Cancelar")
-
                         }
                     }
                 )
-
             }
         }
     }
 }
 
-
-@Composable
-fun PatientListCard(patient: PatientState, navController: NavController, sharedViewModel: SharedViewModel, onClick: () -> Unit) {
-    Card(
-        modifier = Modifier
-            .padding(8.dp)
-            .fillMaxWidth() // Usar el ancho completo de la pantalla
-            .clickable { navController.navigate("imcInput/${patient.id}") }
-    ) {
-        Row(
-            modifier = Modifier
-                .padding(16.dp)
-                .fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
+        @Composable
+        fun PatientListCard(
+            patient: PatientState,
+            navController: NavController,
+            sharedViewModel: SharedViewModel,
+            onClick: () -> Unit
         ) {
-            Text(text = "ID: ${patient.id}", style = MaterialTheme.typography.titleMedium)
-            Text(text = " ${patient.name}", style = MaterialTheme.typography.titleLarge)
-            Button(onClick = {
-                navController.navigate("imcInput/{patientId") // Navega a HomeView con el ID del paciente
-            }) {
-                Text("Calcular IMC")
+            Card(
+                modifier = Modifier
+                    .padding(16.dp)
+                    .fillMaxWidth()
+                    .clickable { onClick() } // Acción al hacer clic en el Card
+            ) {
+                Column(
+                    modifier = Modifier.padding(16.dp)
+                ) {
+                    Row(
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        // Primera columna
+                        Column(
+                            modifier = Modifier.weight(1f),
+                            verticalArrangement = Arrangement.spacedBy(8.dp) // Espaciado entre los textos
+                        ) {
+                            Text("ID: ${patient.id}")
+                            Text("Nombre: ${patient.name}")
+                           /* Text("Edad: ${patient.age} años")
+                            Text("Género: ${patient.gender}")
+
+                            Spacer(modifier = Modifier.width(8.dp)) // Espacio entre las dos columnas
+
+                            // Segunda columna
+                            Column(
+                                modifier = Modifier.weight(1f),
+                                verticalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                Text("Peso: ${patient.weight} kg")
+                                Text("Altura: ${patient.height} cm")
+                                Text("IMC: ${String.format("%.1f", patient.imcResult)}")
+                                Text("Estado de Salud: ${patient.healthStatus}")
+
+
+                            }*/
+                        }
+
+                    }
+                }
+                Button(onClick = {
+                    navController.navigate("imcInput/${patient.id}") // Navega a HomeView con el ID del paciente
+                }) {
+                    Text("Calcular IMC")
+                }
+
             }
         }
-    }
-}

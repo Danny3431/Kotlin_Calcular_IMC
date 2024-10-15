@@ -8,12 +8,14 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import cl.bootcamp.myapplication9kotlin.components.GenderSelector
 import cl.bootcamp.myapplication9kotlin.components.InputField
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import cl.bootcamp.myapplication9kotlin.R
 import cl.bootcamp.myapplication9kotlin.model.PatientState
 import cl.bootcamp.myapplication9kotlin.viewmodel.IMCViewModel
 import cl.bootcamp.myapplication9kotlin.viewmodel.PatientsViewModel
@@ -29,9 +31,22 @@ fun ImcInputView(navController: NavController,sharedViewModel: SharedViewModel, 
     var snackbarVisible by remember { mutableStateOf(false) }
     var showDialog by remember { mutableStateOf(true) }
     var errorMessage by remember { mutableStateOf("") }
+    var showPatientData by remember { mutableStateOf(false) } // Nuevo estado para mostrar los datos del paciente
 
-    // Ejemplo de UI
-    Text("Calcular IMC para el paciente con ID: $patientId")
+    // Actualizar el IMC cuando se ingresa el peso y la altura
+    val imcResult by remember(patientState.weight, patientState.height) {
+        derivedStateOf {
+            if (patientState.height > 0) {
+                (patientState.weight / ((patientState.height / 100.0) * (patientState.height / 100.0))).toFloat()
+            } else {
+                0f
+            }
+        }
+    }
+    // Determinar el estado de salud
+    val healthStatus = IMCViewModel().healthStatus(imcResult)
+
+
 
 
     // Mostrar el AlertDialog al iniciar
@@ -61,6 +76,24 @@ fun ImcInputView(navController: NavController,sharedViewModel: SharedViewModel, 
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
+
+        // Iconos para género
+        val genderIcon = if (patientState.gender == "Hombre") R.drawable.ic_male else R.drawable.ic_female
+
+        Icon(
+            painter = painterResource(id = genderIcon),
+            contentDescription = "Icono de Género",
+            modifier = Modifier.size(64.dp)
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Mostrar el nombre del paciente
+        Text(
+            text = "Nombre del Paciente: ${patientState.name} (ID: $patientId)",
+            style = MaterialTheme.typography.bodyLarge
+        )
+
         Text(text = "Calculadora de IMC", style = MaterialTheme.typography.headlineMedium)
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -77,7 +110,7 @@ fun ImcInputView(navController: NavController,sharedViewModel: SharedViewModel, 
             value = if (patientState.age > 0) patientState.age.toString() else "",
             onValueChange = {
                 if (it.isEmpty()) {
-                    sharedViewModel.updatePatient(patientState.copy(age = 0)) // O manejarlo como desees
+                    sharedViewModel.updatePatient(patientState.copy(age = 0))
                 } else {
                     it.toIntOrNull()?.let { age ->
                         sharedViewModel.updatePatient(patientState.copy(age = age))
@@ -88,7 +121,6 @@ fun ImcInputView(navController: NavController,sharedViewModel: SharedViewModel, 
             keyboardType = KeyboardType.Number
         )
 
-// Campo de peso
         InputField(
             value = if (patientState.weight > 0) patientState.weight.toString() else "",
             onValueChange = {
@@ -104,7 +136,6 @@ fun ImcInputView(navController: NavController,sharedViewModel: SharedViewModel, 
             keyboardType = KeyboardType.Number
         )
 
-// Campo de altura
         InputField(
             value = if (patientState.height > 0) patientState.height.toString() else "",
             onValueChange = {
@@ -120,48 +151,92 @@ fun ImcInputView(navController: NavController,sharedViewModel: SharedViewModel, 
             keyboardType = KeyboardType.Number
         )
 
-
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Botón para calcular IMC
+        // Mostrar IMC y estado de salud sin necesidad de un botón adicional
+        Text(
+            text = "Resultado del IMC: ${String.format("%.1f", imcResult)}",
+            style = MaterialTheme.typography.bodyLarge
+        )
+        Text(
+            text = "Estado de Salud: $healthStatus",
+            style = MaterialTheme.typography.bodyLarge
+        )
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        // Nuevo botón para mostrar los datos del paciente
         Button(onClick = {
-            // Validar campos antes de navegar
-            if (patientState.age > 0 && patientState.weight > 0 && patientState.height > 0) {
-                sharedViewModel.updatePatientDetails(patientState.age, patientState.height, patientState.weight)
-                navController.navigate("data")
-            } else {
-                snackbarVisible = true // Mostrar snackbar si hay errores
-                errorMessage = "Por favor, completa todos los campos."
-            }
+            showPatientData = true // Cambiar el estado a true cuando se haga clic
         }) {
-            Text("Calcular IMC")
+            Text("Mostrar Datos Paciente")
         }
 
         Spacer(modifier = Modifier.height(24.dp))
 
+        // Mostrar la tarjeta con los datos del paciente solo si el estado es true
+        if (showPatientData) {
+            Card(
+                modifier = Modifier
+                    .padding(16.dp)
+                    .fillMaxWidth()
+            ) {
+                Column(
+                    modifier = Modifier.padding(16.dp)
+                ) {
+                    Row(
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        // Primera columna
+                        Column(
+                            modifier = Modifier.weight(1f),
+                            verticalArrangement = Arrangement.spacedBy(8.dp) // Espaciado entre los textos
+                        ) {
+                            Text("ID: $patientId")
+                            Text("Nombre: ${patientState.name}")
+                            Text("Edad: ${patientState.age} años")
+                            Text("Género: ${patientState.gender}")
 
 
-        // Obtener el resultado del IMC, usando un valor predeterminado si es nulo
-        val imcResult = IMCViewModel().state.value.imcResult ?: 0f
-        val healthStatus = IMCViewModel().healthStatus(imcResult)
 
-        Text(
-            text = "Resultado del IMC: ${String.format("%.1f", imcResult)}", // Mostrar con un decimal
-            style = MaterialTheme.typography.bodyLarge
-        )
+                        }
 
-        Text(
-            text = "Estado de Salud: $healthStatus", // Mostrar estado de salud
-            style = MaterialTheme.typography.bodyLarge
-        )
+                        Spacer(modifier = Modifier.width(16.dp)) // Espacio entre las dos columnas
 
-        Spacer(modifier = Modifier.height(30.dp))
-        Button(onClick = { /*TODO*/ }) {
-            Text("Mostrar Datos Paciente")
+                        // Segunda columna
+                        Column(
+                            modifier = Modifier.weight(1f),
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Text("Peso: ${patientState.weight} kg")
+                            Text("Altura: ${patientState.height} cm")
+                            Text("IMC: ${String.format("%.1f", imcResult)}")
+                            Text("Estado de Salud: $healthStatus")
+
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(16.dp)) // Espacio antes del botón
+
+                    Button(
+                        onClick = {
+                            val updatedPatient = patientState.copy(
+                                imcResult = imcResult,
+                                healthStatus = healthStatus
+                            )
+                            sharedViewModel.addPatient(updatedPatient) // Agregar a la lista
+                            sharedViewModel.savePatientData(updatedPatient) // Guardar en DataStore
+                            navController.navigate("patients") // Navegar a la lista de pacientes
+                        },
+                        modifier = Modifier.align(Alignment.CenterHorizontally) // Centrar el botón
+                    ) {
+                        Text("Guardar Datos")
+                    }
+                }
+            }
         }
 
-
-        // Mostrar Snackbar si hay un mensaje de error
         if (snackbarVisible) {
             Snackbar(
                 action = {
@@ -169,6 +244,7 @@ fun ImcInputView(navController: NavController,sharedViewModel: SharedViewModel, 
                         Text("Cerrar")
                     }
                 }
+
             ) {
                 Text(errorMessage)
             }

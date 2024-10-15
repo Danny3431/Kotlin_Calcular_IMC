@@ -9,7 +9,6 @@ import androidx.navigation.compose.rememberNavController
 import cl.bootcamp.myapplication9kotlin.view.HomeView
 import cl.bootcamp.myapplication9kotlin.view.PatientsView
 import cl.bootcamp.myapplication9kotlin.view.ImcInputView
-import cl.bootcamp.myapplication9kotlin.view.PatientsDataView
 import cl.bootcamp.myapplication9kotlin.viewmodel.SharedViewModel
 
 @Composable
@@ -23,6 +22,6 @@ fun AppNavHost(modifier: Modifier = Modifier, sharedViewModel: SharedViewModel) 
             val patientId = backStackEntry.arguments?.getString("patientId")?.toIntOrNull() ?: 0
             ImcInputView(navController, sharedViewModel, patientId)
         }
-        composable("data") { PatientsDataView(navController, sharedViewModel) }
     }
+
 }
