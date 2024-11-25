@@ -7,8 +7,8 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import cl.bootcamp.myapplication9kotlin.model.PatientState
-import com.google.firebase.crashlytics.buildtools.reloc.com.google.common.reflect.TypeToken
-import com.google.gson.Gson
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
 
 
 class IMCViewModel : ViewModel() {
@@ -61,10 +61,10 @@ class IMCViewModel : ViewModel() {
         val errors = mutableListOf<String>()
 
 
-        if ( state.value.weight <= 0) {
+        if (state.value.weight <= 0) {
             errors.add("Por favor, ingrese un peso válido.")
         }
-        if ( state.value.height <= 0 || state.value.height > 270) {
+        if (state.value.height <= 0 || state.value.height > 270) {
             errors.add("Por favor, ingrese una altura válida (máx. 270 cm).") // Altura máxima de 270 cm
         }
         if (state.value.age <= 0 || state.value.age > 125) { // edad maxima de 125  años es una edad razonable
@@ -125,24 +125,34 @@ class IMCViewModel : ViewModel() {
 
     // Métodos para guardar y cargar pacientes en DataStore
     suspend fun savePatientsToDataStore(dataStore: DataStore<Preferences>) {
-        val patientJson = Gson().toJson(patients)
         dataStore.edit { preferences ->
-            preferences[stringPreferencesKey("patients")] = patientJson
+            preferences[stringPreferencesKey("patients")] = patients.joinToString(";") {
+                "${it.weight},${it.height},${it.age},${it.gender}"
+            }
         }
     }
 
     suspend fun loadPatientsFromDataStore(dataStore: DataStore<Preferences>) {
-        dataStore.data.collect { preferences ->
-            val patientJson = preferences[stringPreferencesKey("patients")] ?: return@collect
-            val patientListType = object : TypeToken<List<PatientState>>() {}.type
-            patients.clear()
-            patients.addAll(Gson().fromJson(patientJson, patientListType))
-        }
-    }
+        val patientData = dataStore.data
+            .map { preferences ->
+                preferences[stringPreferencesKey("patients")] ?: ""
+            }
+            .first()
 
-    fun saveCurrentPatient() {
-        if (validateFields()) {
-            addPatient(state.value)
+        patients.clear()
+        if (patientData.isNotEmpty()) {
+            patientData.split(";").forEach { patientInfo ->
+                val info = patientInfo.split(",")
+                if (info.size == 4) {
+                    val patient = PatientState(
+                        weight = info[0].toInt(),
+                        height = info[1].toInt(),
+                        age = info[2].toInt(),
+                        gender = info[3]
+                    )
+                    patients.add(patient)
+                }
+            }
         }
     }
 }

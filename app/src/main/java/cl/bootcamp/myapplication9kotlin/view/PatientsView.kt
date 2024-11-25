@@ -1,6 +1,5 @@
 package cl.bootcamp.myapplication9kotlin.view
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.text.input.KeyboardType
@@ -16,8 +15,6 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import cl.bootcamp.myapplication9kotlin.model.PatientState
 import cl.bootcamp.myapplication9kotlin.viewmodel.SharedViewModel
-import cl.bootcamp.myapplication9kotlin.components.GenderSelector
-
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -26,6 +23,16 @@ fun PatientsView(navController: NavController, sharedViewModel: SharedViewModel,
 
     val sharedViewModel: SharedViewModel = viewModel()
     val patientsList by sharedViewModel.patientsList.observeAsState(emptyList())
+
+    // Cargar el estado del paciente actual
+    val patientState by sharedViewModel.patient.observeAsState(PatientState())
+    val patientId = patientState.id
+
+    // Al cambiar de paciente, restablecer los datos previos
+    LaunchedEffect(patientId) {
+        sharedViewModel.clearPatientData()
+        sharedViewModel.loadPatientById(patientId) // Cargar los datos del paciente seleccionado
+    }
 
     var showModal by remember { mutableStateOf(false) }
     var newPatientName by remember { mutableStateOf("") }
@@ -49,7 +56,7 @@ fun PatientsView(navController: NavController, sharedViewModel: SharedViewModel,
             verticalArrangement = Arrangement.Top,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Mostrar el listado de pacientes
+            // Mostrar el listado de pacientes con todos sus datos
             LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
@@ -57,16 +64,8 @@ fun PatientsView(navController: NavController, sharedViewModel: SharedViewModel,
                     .weight(1f)
             ) {
                 items(patientsList) { patient ->
-                    PatientListCard(
-                        patient = patient,
-                        navController = navController,
-                        sharedViewModel = sharedViewModel,
-                                onClick = {
-                              navController.navigate(
-                                "imcInput/${patient.id}"
-                            ) // Navegar con el ID
-                        }
-                    )
+                    // Aquí mostramos la nueva tarjeta con los detalles completos del paciente
+                    PatientDetailsCard(patient = patient)
                 }
             }
 
@@ -107,16 +106,16 @@ fun PatientsView(navController: NavController, sharedViewModel: SharedViewModel,
 
                                 sharedViewModel.addPatient(
                                     PatientState(
-                                        id = newId, // Asignar ID automáticamente
+                                        id = sharedViewModel.nextId, // Utiliza el ID generado automáticamente
                                         name = newPatientName,
-                                        age = 0, // Asignar 0 o manejar más adelante
-                                        height = 0, // Asignar 0 o manejar más adelante
-                                        weight = 0, // Asignar 0 o manejar más adelante
-                                        gender = "", //  Manejar más adelante
-                                        imcResult = 0f // Asignar 0 o manejar más adelante
-
+                                        age = 0,
+                                        height = 0,
+                                        weight = 0,
+                                        gender = "",
+                                        imcResult = 0f
                                     )
                                 )
+                                sharedViewModel.incrementId() // Incrementar el ID después de agregar el paciente
 
                                 // Limpiar los campos
                                 newPatientName = ""
@@ -138,59 +137,50 @@ fun PatientsView(navController: NavController, sharedViewModel: SharedViewModel,
     }
 }
 
-        @Composable
-        fun PatientListCard(
-            patient: PatientState,
-            navController: NavController,
-            sharedViewModel: SharedViewModel,
-            onClick: () -> Unit
-        ) {
-            Card(
-                modifier = Modifier
-                    .padding(16.dp)
-                    .fillMaxWidth()
-                    .clickable { onClick() } // Acción al hacer clic en el Card
-            ) {
-                Column(
-                    modifier = Modifier.padding(16.dp)
-                ) {
-                    Row(
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        // Primera columna
-                        Column(
-                            modifier = Modifier.weight(1f),
-                            verticalArrangement = Arrangement.spacedBy(8.dp) // Espaciado entre los textos
-                        ) {
-                            Text("ID: ${patient.id}")
-                            Text("Nombre: ${patient.name}")
-                           /* Text("Edad: ${patient.age} años")
-                            Text("Género: ${patient.gender}")
-
-                            Spacer(modifier = Modifier.width(8.dp)) // Espacio entre las dos columnas
-
-                            // Segunda columna
-                            Column(
-                                modifier = Modifier.weight(1f),
-                                verticalArrangement = Arrangement.spacedBy(8.dp)
-                            ) {
-                                Text("Peso: ${patient.weight} kg")
-                                Text("Altura: ${patient.height} cm")
-                                Text("IMC: ${String.format("%.1f", patient.imcResult)}")
-                                Text("Estado de Salud: ${patient.healthStatus}")
 
 
-                            }*/
-                        }
-
-                    }
-                }
-                Button(onClick = {
-                    navController.navigate("imcInput/${patient.id}") // Navega a HomeView con el ID del paciente
-                }) {
-                    Text("Calcular IMC")
-                }
-
+@Composable
+fun PatientListCard(
+    patient: PatientState,
+    navController: NavController,
+    sharedViewModel: SharedViewModel,
+    onClick: () -> Unit
+) {
+    Card(
+        modifier = Modifier
+            .padding(16.dp)
+            .fillMaxWidth()
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text("ID: ${patient.id}")
+            Text("Nombre: ${patient.name}")
+            Button(onClick = {
+                navController.navigate("imcInput/${patient.id}")
+            }) {
+                Text("Completar Datos")
             }
         }
+    }
+}
+
+@Composable
+fun PatientDetailsCard(
+    patient: PatientState,
+    modifier: Modifier = Modifier
+) {
+    Card(
+        modifier = Modifier
+            .padding(16.dp)
+            .fillMaxWidth()
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text("ID: ${patient.id}")
+            Text("Nombre: ${patient.name}")
+            Text("Edad: ${patient.age}")
+            Text("Altura: ${patient.height}")
+            Text("Peso: ${patient.weight}")
+            Text("Género: ${patient.gender}")
+            Text("IMC: ${patient.imcResult}")
+        }
+    }
+}

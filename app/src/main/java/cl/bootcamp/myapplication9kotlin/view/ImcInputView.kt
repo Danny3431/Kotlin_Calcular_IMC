@@ -90,8 +90,9 @@ fun ImcInputView(navController: NavController,sharedViewModel: SharedViewModel, 
 
         // Mostrar el nombre del paciente
         Text(
-            text = "Nombre del Paciente: ${patientState.name} (ID: $patientId)",
-            style = MaterialTheme.typography.bodyLarge
+            text = "Nombre: ${patientState.name} (ID: $patientId)",
+            style = MaterialTheme.typography.titleLarge,
+            modifier = Modifier.padding(bottom = 10.dp)
         )
 
         Text(text = "Calculadora de IMC", style = MaterialTheme.typography.headlineMedium)
@@ -163,7 +164,7 @@ fun ImcInputView(navController: NavController,sharedViewModel: SharedViewModel, 
             style = MaterialTheme.typography.bodyLarge
         )
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(14.dp))
 
         // Nuevo botón para mostrar los datos del paciente
         Button(onClick = {
@@ -172,7 +173,7 @@ fun ImcInputView(navController: NavController,sharedViewModel: SharedViewModel, 
             Text("Mostrar Datos Paciente")
         }
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(12.dp))
 
         // Mostrar la tarjeta con los datos del paciente solo si el estado es true
         if (showPatientData) {
@@ -182,7 +183,7 @@ fun ImcInputView(navController: NavController,sharedViewModel: SharedViewModel, 
                     .fillMaxWidth()
             ) {
                 Column(
-                    modifier = Modifier.padding(16.dp)
+                    modifier = Modifier.padding(12.dp)
                 ) {
                     Row(
                         horizontalArrangement = Arrangement.SpaceBetween,
@@ -198,11 +199,9 @@ fun ImcInputView(navController: NavController,sharedViewModel: SharedViewModel, 
                             Text("Edad: ${patientState.age} años")
                             Text("Género: ${patientState.gender}")
 
-
-
                         }
 
-                        Spacer(modifier = Modifier.width(16.dp)) // Espacio entre las dos columnas
+                        Spacer(modifier = Modifier.width(12.dp)) // Espacio entre las dos columnas
 
                         // Segunda columna
                         Column(
@@ -217,7 +216,7 @@ fun ImcInputView(navController: NavController,sharedViewModel: SharedViewModel, 
                         }
                     }
 
-                    Spacer(modifier = Modifier.height(16.dp)) // Espacio antes del botón
+                    Spacer(modifier = Modifier.height(12.dp)) // Espacio antes del botón
 
                     Button(
                         onClick = {
@@ -226,10 +225,10 @@ fun ImcInputView(navController: NavController,sharedViewModel: SharedViewModel, 
                                 healthStatus = healthStatus
                             )
                             sharedViewModel.addPatient(updatedPatient) // Agregar a la lista
-                            sharedViewModel.savePatientData(updatedPatient) // Guardar en DataStore
+                            sharedViewModel.savePatientData(updatedPatient) // Guardar en DataStore (si es necesario)
                             navController.navigate("patients") // Navegar a la lista de pacientes
                         },
-                        modifier = Modifier.align(Alignment.CenterHorizontally) // Centrar el botón
+                        modifier = Modifier.align(Alignment.CenterHorizontally)
                     ) {
                         Text("Guardar Datos")
                     }

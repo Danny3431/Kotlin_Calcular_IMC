@@ -17,6 +17,7 @@ import cl.bootcamp.myapplication9kotlin.model.PatientState
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
+
 // Extensión para acceder a DataStore desde el contexto
 private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "patient_preferences")
 
@@ -33,6 +34,8 @@ class SharedViewModel(application: Application) : AndroidViewModel(application) 
     private val IMC_KEY = floatPreferencesKey("imc")
     private val HEALTH_STATUS_KEY = stringPreferencesKey("health_status")
 
+
+
     // LiveData para el paciente actual
     private val _patient = MutableLiveData<PatientState>()
     val patient: LiveData<PatientState> = _patient
@@ -41,8 +44,17 @@ class SharedViewModel(application: Application) : AndroidViewModel(application) 
     private val _patientsList = MutableLiveData<List<PatientState>>(emptyList())
     val patientsList: LiveData<List<PatientState>> = _patientsList
 
-    // ID para generar pacientes únicos
-    private var currentId = 1
+    // Hacer 'currentId' privado
+    private var currentId: Int = 1
+
+    // Getter público para obtener el próximo ID
+    val nextId: Int
+        get() = currentId
+
+    // Método para incrementar el ID
+    fun incrementId() {
+        currentId++
+    }
 
     init {
         _patient.value = PatientState() // Inicializamos con un estado vacío
@@ -83,24 +95,22 @@ class SharedViewModel(application: Application) : AndroidViewModel(application) 
             }
         }
     }
+
     // Función para actualizar el paciente completo
     fun updatePatient(patient: PatientState) {
-         _patient.value = patient
+        _patient.value = patient
         savePatientData(patient)
     }
 
-    fun addPatient( patient: PatientState) {
-        _patientsList.value = _patientsList.value?.toMutableList()?.apply {
-            add(patient)
-        }
-        savePatientData(patient)
+    fun addPatient(patient: PatientState) {
+        val updatedList = _patientsList.value?.toMutableList() ?: mutableListOf()
+        updatedList.add(patient)
+        _patientsList.value = updatedList
+        saveAllPatients() // Guarda la lista completa
     }
-
     fun clearPatientData() {
         _patient.value = PatientState() // Reinicia a un nuevo PatientState vacío
     }
-
-
 
 
     // Función para agregar pacientes a la lista y guardar en DataStore
@@ -109,7 +119,7 @@ class SharedViewModel(application: Application) : AndroidViewModel(application) 
         val healthStatus = determineHealthStatus(imcResult)
 
         val newPatient = PatientState(
-            id = currentId++, // Incrementamos el ID
+            id = currentId++, // Asegúrate de que `currentId` se maneje adecuadamente
             name = name,
             age = age,
             height = height,
@@ -119,18 +129,64 @@ class SharedViewModel(application: Application) : AndroidViewModel(application) 
             healthStatus = healthStatus
         )
 
-        // Agregamos el paciente a la lista actual
-        _patientsList.value = _patientsList.value?.toMutableList()?.apply {
-            add(newPatient) // Agregar el nuevo paciente
-        }
+        // Agregar a la lista y guardar
+        _patientsList.value = _patientsList.value?.toMutableList()?.apply { add(newPatient) }
+        saveAllPatients() // Nueva función para guardar todos los pacientes
+    }
 
-        // Guardar los datos del nuevo paciente en DataStore
-        savePatientData(newPatient)
+    private fun saveAllPatients() {
+        viewModelScope.launch {
+
+            context.dataStore.edit { preferences ->
+                val patientStrings = _patientsList.value?.joinToString(";") { patient ->
+                    "${patient.id},${patient.name},${patient.age},${patient.height},${patient.weight},${patient.gender},${patient.imcResult},${patient.healthStatus}"
+                } ?: ""
+                preferences[stringPreferencesKey("patients")] =
+                    patientStrings // Guarda la cadena en DataStore
+                preferences[ID_KEY] = currentId
+            }
+        }
+    }
+    // Función para cargar pacientes desde DataStore
+
+    init {
+        loadPatients() // Cargar pacientes al iniciar
+    }
+
+    private fun loadPatients() {
+        viewModelScope.launch {
+            val preferences = context.dataStore.data.first()
+            val patientStrings =
+                preferences[stringPreferencesKey("patients")] ?: return@launch // Obtiene la cadena
+
+
+            // Convierte la cadena en una lista de pacientes
+            val patients = patientStrings.split(";").mapNotNull { patientString ->
+                val attributes = patientString.split(",")
+                if (attributes.size == 8) {
+                    PatientState(
+                        id = attributes[0].toInt(),
+                        name = attributes[1],
+                        age = attributes[2].toInt(),
+                        height = attributes[3].toInt(),
+                        weight = attributes[4].toInt(),
+                        gender = attributes[5],
+                        imcResult = attributes[6].toFloat(),
+                        healthStatus = attributes[7]
+                    )
+                } else null
+            }
+            _patientsList.value = patients // Actualiza la lista de pacientes
+            _patient.value = patients.lastOrNull() ?: PatientState() // Actualiza el paciente actual
+
+            //actualizar  currentId para evitar duplicados
+            currentId = patients.maxOfOrNull { it.id }?.plus(1) ?: 1
+        }
     }
 
     // Calcular el IMC
     private fun calculateIMC(weight: Int, height: Int): Float {
-        return if (height > 0) (weight / (height * height)) * 10000f else 0f
+        return if (height > 0) weight / ((height / 100f) * (height / 100f)) else 0f
     }
 
     // Determinar el estado de salud basado en el IMC
@@ -181,4 +237,9 @@ class SharedViewModel(application: Application) : AndroidViewModel(application) 
     fun getPatientById(id: Int): PatientState? {
         return _patientsList.value?.find { it.id == id }
     }
+
+    fun loadPatientById(patientId: Int) {
+
+    }
 }
+

@@ -63,16 +63,19 @@ dependencies {
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.navigation.runtime.ktx)
     implementation(libs.androidx.runtime.livedata)
-   
+    implementation ("androidx.compose.ui:ui:1.7.4")
 
 
     implementation(libs.androidx.lifecycle.viewmodel.compose)
-
-
-    implementation("androidx.datastore:datastore:1.1.1")
     implementation("androidx.datastore:datastore-preferences:1.1.1")
+    implementation("androidx.datastore:datastore:1.1.1")
+    implementation("io.coil-kt:coil-compose:2.7.0")
+    implementation("androidx.navigation:navigation-compose:2.8.3")
+
+
+
     implementation(libs.firebase.crashlytics.buildtools)
-    implementation("com.google.code.gson:gson:2.10.1")
+
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
@@ -81,6 +84,12 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+
+    implementation("com.google.accompanist:accompanist-pager:0.28.0")
+    implementation("com.airbnb.android:lottie-compose:6.5.1")
+    implementation("androidx.navigation:navigation-compose:2.8.2")
+    implementation("androidx.datastore:datastore-preferences:1.1.1")
+    implementation(kotlin("script-runtime"))
 
 
 
