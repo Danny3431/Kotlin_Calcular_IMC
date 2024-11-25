@@ -6,9 +6,8 @@ Este proyecto es una aplicación de Android que se ira escalndo en 6 etapas o Tr
 - La 1° etapa  permite el ingreso de datos de usuarios ingresar su Edad, Peso en Kg y altura en Cm y botones de seleccion de genero.
 - la 2° etapa sera que funcione el boton con la funcion calcularIMC en el IMCViewModel
 - la 3° etapa sera Crear una carpeta model y en ella el archivo stateIMC con las variables que se  utilizarán, quedan configuradas las carpetas view y viewmodel
-- la 4° etapa
-- la 5° etapa
-- la 6° y ultima etapa
+- la 4° y  5° etapas se crean el listado y el  Ingreso de datos al paciente por pantalla
+- la 6° se crea una pantalla de Onboarding, con breve explicacion del contenido y veneficios de la App
 
 
 ## ⚙️ Requisitos
