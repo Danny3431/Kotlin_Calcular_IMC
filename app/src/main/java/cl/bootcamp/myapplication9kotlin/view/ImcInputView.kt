@@ -1,5 +1,7 @@
 package cl.bootcamp.myapplication9kotlin.view
 
+import androidx.appcompat.app.AlertDialog
+import androidx.compose.foundation.content.MediaType.Companion.Text
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
@@ -8,9 +10,11 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.PointerIcon.Companion.Text
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.compose.material3.Text
 import cl.bootcamp.myapplication9kotlin.components.GenderSelector
 import cl.bootcamp.myapplication9kotlin.components.InputField
 import androidx.lifecycle.viewmodel.compose.viewModel

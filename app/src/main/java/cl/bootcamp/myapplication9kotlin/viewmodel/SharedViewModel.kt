@@ -119,7 +119,7 @@ class SharedViewModel(application: Application) : AndroidViewModel(application) 
         val healthStatus = determineHealthStatus(imcResult)
 
         val newPatient = PatientState(
-            id = currentId++, // Asegúrate de que `currentId` se maneje adecuadamente
+            id = currentId++, // Asegura de que `currentId` se maneje adecuadamente
             name = name,
             age = age,
             height = height,

@@ -5,12 +5,12 @@ plugins {
 
 android {
     namespace = "cl.bootcamp.myapplication9kotlin"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "cl.bootcamp.myapplication9kotlin"
         minSdk = 30
-        targetSdk = 34
+        targetSdk = 35
         versionCode = 1
         versionName = "1.0"
 

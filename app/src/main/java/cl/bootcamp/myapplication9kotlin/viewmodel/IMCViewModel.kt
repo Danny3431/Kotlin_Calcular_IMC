@@ -23,17 +23,17 @@ class IMCViewModel : ViewModel() {
         private set
 
     fun updateWeight(weight: Int) {
-        state.value = state.value.copy(weight = weight) // No necesita toIntOrNull()
+        state.value = state.value.copy(weight = weight)
         errorMessage.value = "" // Limpiar mensaje de error al actualizar
     }
 
     fun updateHeight(height: Int) {
-        state.value = state.value.copy(height = height) // No necesita toIntOrNull()
+        state.value = state.value.copy(height = height)
         errorMessage.value = "" // Limpiar mensaje de error al actualizar
     }
 
     fun updateAge(age: Int) {
-        state.value = state.value.copy(age = age) // No necesita toIntOrNull()
+        state.value = state.value.copy(age = age)
         errorMessage.value = "" // Limpiar mensaje de error al actualizar
     }
 
@@ -65,7 +65,7 @@ class IMCViewModel : ViewModel() {
             errors.add("Por favor, ingrese un peso válido.")
         }
         if (state.value.height <= 0 || state.value.height > 270) {
-            errors.add("Por favor, ingrese una altura válida (máx. 270 cm).") // Altura máxima de 270 cm
+            errors.add("Por favor, ingrese una altura válida (máx. 250 cm).") // Altura máxima de 250 cm
         }
         if (state.value.age <= 0 || state.value.age > 125) { // edad maxima de 125  años es una edad razonable
             errors.add("Por favor, ingrese una edad válida.")
